@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Inter", sans-serif;
+  --font-mono: "Fira Code", monospace;
+
+  /* Animasi Kustom yang sangat smooth */
+  --animate-fade-in: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-right: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-bounce-soft: bounce-soft 2s infinite ease-in-out;
+  --animate-pulse-slow: pulse-slow 3s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  --animate-spin-slow: spin-slow 8s linear infinite;
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+}
+
+/* ========================================= */
+/* CSS PRINT (CETAK DOKUMEN FISIK)           */
+/* ========================================= */
+@media print {
+  /* Hilangkan Sidebar & Main Layout Wrapper saat cetak */
+  .print-hide, aside, header {
+    display: none !important;
+  }
+  .print-block {
+    display: block !important;
+  }
+  /* Paksa background putih 100% dan teks normal ukurannya */
+  body {
+    background-color: white !important;
+    padding: 0;
+    margin: 0;
+    color: black !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  /* Hilangkan shadows dan bulatan ekstrim agar rapi di kertas */
+  * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  /* Cegah section terpotong setengah halaman */
+  .print-break-inside-avoid {
+    break-inside: avoid;
+  }
+}
