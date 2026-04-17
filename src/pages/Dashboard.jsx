@@ -2,6 +2,7 @@ import {
   BookOpen, DollarSign, GraduationCap, Calendar, Briefcase, Zap, 
   Bell, Users, FileCheck, Server, AlertCircle, Info, CheckCircle 
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { getAllKeuangan, getKeuanganUser } from '../services/db';
 
 const Dashboard = () => {
@@ -187,9 +188,9 @@ const Dashboard = () => {
              <p className="text-sm text-gray-600 leading-relaxed">
                Akses eksklusif bagi mahasiswa LP3I untuk lowongan kerja dari perusahaan mitra. Lengkapi CV di menu CNP.
              </p>
-             <button className="bg-blue-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-blue-700 mt-2 transition-colors flex items-center text-sm shadow-md shadow-blue-500/20">
+             <Link to="/app/cnp" className="w-max bg-blue-600 text-white font-bold py-2.5 px-6 rounded-xl hover:bg-blue-700 mt-2 transition-colors flex items-center text-sm shadow-md shadow-blue-500/20">
                 Lengkapi CV <Zap size={16} className="ml-2"/>
-             </button>
+             </Link>
           </div>
         </div>
         

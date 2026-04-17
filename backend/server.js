@@ -297,6 +297,22 @@ app.delete('/api/users/:id', async (req, res) => {
    res.json({ success: true });
 });
 
+app.post('/api/users/:id/avatar', upload.single('avatar'), async (req, res) => {
+   let foto = req.body.foto || '';
+   if (req.file) {
+       foto = 'http://localhost:5000/uploads/' + req.file.filename;
+   }
+   if (!foto) return res.status(400).json({error: 'Tidak ada foto'});
+   
+   try {
+       await pool.query('UPDATE users SET foto = ? WHERE id = ?', [foto, req.params.id]);
+       res.json({ success: true, data: { foto } });
+   } catch(e) {
+       res.status(500).json({error: e.message});
+   }
+});
+
+
 // -- MATKULS --
 app.get('/api/matkuls', async (req, res) => {
   if(!pool) return res.json([]);

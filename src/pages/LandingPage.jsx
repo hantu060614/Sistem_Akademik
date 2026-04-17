@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser, createTicket } from '../services/db';
+import { loginUser, createTicket, resetPassword } from '../services/db';
 import { 
   ShieldCheck, Headset, Lock, User, ArrowRight, AlertCircle, Server, MessageSquare, X, Send
 } from 'lucide-react';
@@ -18,6 +18,11 @@ const LandingPage = () => {
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
   const [widgetSuccess, setWidgetSuccess] = useState(false);
   const [guestForm, setGuestForm] = useState({ nim: '', message: '' });
+
+  // State untuk Lupa Kata Sandi
+  const [isForgotSandiOpen, setIsForgotSandiOpen] = useState(false);
+  const [forgotForm, setForgotForm] = useState({ nim: '', tanggalLahir: '', newPassword: '' });
+  const [forgotMsg, setForgotMsg] = useState({ type: '', text: '' });
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -47,6 +52,22 @@ const LandingPage = () => {
        setWidgetSuccess(false);
        setGuestForm({ nim: '', message: '' });
     }, 3500);
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setForgotMsg({ type: '', text: '' });
+    if(!forgotForm.nim || !forgotForm.tanggalLahir || !forgotForm.newPassword) {
+        setForgotMsg({ type: 'error', text: 'Mohon isi semua form untuk verifikasi.' });
+        return;
+    }
+    const res = await resetPassword(forgotForm.nim, forgotForm.tanggalLahir, forgotForm.newPassword);
+    if(res.success) {
+        setForgotMsg({ type: 'success', text: res.message });
+        setTimeout(() => setIsForgotSandiOpen(false), 2000);
+    } else {
+        setForgotMsg({ type: 'error', text: res.message });
+    }
   };
 
   return (
@@ -155,7 +176,7 @@ const LandingPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                  <label className="block text-sm font-bold text-slate-700">Kata Sandi</label>
-                 <a href="#" className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Lupa sandi?</a>
+                 <button type="button" onClick={() => setIsForgotSandiOpen(true)} className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Lupa sandi?</button>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-600 text-slate-400">
@@ -189,6 +210,39 @@ const LandingPage = () => {
 
         </div>
       </div>
+
+      {/* MODAL LUPA KATA SANDI */}
+      {isForgotSandiOpen && (
+         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
+               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
+                  <h3 className="font-extrabold text-lg text-blue-900 flex items-center"><Lock size={18} className="mr-2"/> Atur Ulang Sandi</h3>
+                  <button onClick={() => setIsForgotSandiOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors"><X size={20}/></button>
+               </div>
+               <form onSubmit={handleForgotSubmit} className="p-6 space-y-4">
+                  {forgotMsg.text && (
+                     <div className={`p-3 rounded-xl text-xs font-bold ${forgotMsg.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                        {forgotMsg.text}
+                     </div>
+                  )}
+                  <p className="text-xs font-medium text-slate-500 mb-2">Verifikasi identitas Anda untuk merubah kata sandi.</p>
+                  <div>
+                     <label className="block text-[10px] uppercase font-black text-slate-400 mb-1 tracking-wider">ID Pengguna (NIM/NIDN)</label>
+                     <input type="text" value={forgotForm.nim} onChange={e => setForgotForm({...forgotForm, nim: e.target.value})} className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500 font-bold" />
+                  </div>
+                  <div>
+                     <label className="block text-[10px] uppercase font-black text-slate-400 mb-1 tracking-wider">Tanggal Lahir (YYYY-MM-DD)</label>
+                     <input type="text" placeholder="Contoh: 2001-05-12" value={forgotForm.tanggalLahir} onChange={e => setForgotForm({...forgotForm, tanggalLahir: e.target.value})} className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500" />
+                  </div>
+                  <div>
+                     <label className="block text-[10px] uppercase font-black text-slate-400 mb-1 tracking-wider">Kata Sandi Baru</label>
+                     <input type="password" value={forgotForm.newPassword} onChange={e => setForgotForm({...forgotForm, newPassword: e.target.value})} className="w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-blue-500" />
+                  </div>
+                  <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition-all mt-4">Simpan Sandi Baru</button>
+               </form>
+            </div>
+         </div>
+      )}
 
       {/* FLOATING HELPDESK WIDGET */}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end">

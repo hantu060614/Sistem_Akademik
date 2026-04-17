@@ -2,12 +2,20 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowLeft, FileEdit, Clock, Calendar as CalendarIcon, 
-  Download, UploadCloud, CheckCircle, AlertTriangle 
+  Download, UploadCloud, CheckCircle, AlertTriangle, X 
 } from 'lucide-react';
+import { addSubmission, getUserSubmissions } from '../services/db';
 
 const Uts = () => {
-  // Simulasi state untuk file yang sudah di-upload
-  const [uploadedExams, setUploadedExams] = useState([]);
+  const userId = localStorage.getItem('userId');
+  const [submissions, setSubmissions] = useState([]);
+  const [activeUploadId, setActiveUploadId] = useState(null);
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  React.useEffect(() => {
+     if(userId) setSubmissions(getUserSubmissions(userId, 'uts'));
+  }, [userId]);
 
   // Data Dummy UTS (Menggunakan matkul semester ini agar sinkron)
   const dataUts = [
@@ -28,12 +36,18 @@ const Uts = () => {
     }
   ];
 
-  const handleUpload = (id) => {
-    // Simulasi aksi upload file jawaban
-    if (!uploadedExams.includes(id)) {
-      setUploadedExams([...uploadedExams, id]);
-      alert('File jawaban berhasil diunggah dan tersimpan di server!');
-    }
+  const handleUploadSubmit = async (e) => {
+     e.preventDefault();
+     if(!file) return alert('Pilih file jawaban Anda terlebih dahulu!');
+     setIsUploading(true);
+     const data = { nim: userId, kategori: 'uts', tipe: activeUploadId, status: 'Terkumpul' };
+     await addSubmission(data, file);
+     setSubmissions(getUserSubmissions(userId, 'uts'));
+     setIsUploading(false);
+     setActiveUploadId(null);
+     setFile(null);
+     // Use toast/non-intrusive alert if wanted, but native alert is okay to confirm
+     alert('File jawaban berhasil diunggah dan tersimpan di server!');
   };
 
   return (
@@ -71,7 +85,7 @@ const Uts = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {dataUts.map((ujian) => {
           // Logika untuk merubah status menjadi selesai jika sudah di-upload
-          const isUploaded = uploadedExams.includes(ujian.id) || ujian.status === 'selesai';
+          const isUploaded = submissions.some(s => s.tipe === ujian.id) || ujian.status === 'selesai';
           const currentStatus = isUploaded ? 'selesai' : ujian.status;
 
           return (
@@ -126,7 +140,7 @@ const Uts = () => {
                       <Download size={16} className="mr-2" /> Soal
                     </button>
                     <button 
-                      onClick={() => handleUpload(ujian.id)}
+                      onClick={() => setActiveUploadId(ujian.id)}
                       className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center text-sm"
                     >
                       <UploadCloud size={16} className="mr-2" /> Jawab
@@ -145,6 +159,27 @@ const Uts = () => {
           );
         })}
       </div>
+
+      {/* MODAL UPLOAD UTS */}
+      {activeUploadId && (
+         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
+               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
+                  <h3 className="font-extrabold text-lg text-blue-900 flex items-center"><UploadCloud size={18} className="mr-2"/> Upload Jawaban</h3>
+                  <button onClick={() => {setActiveUploadId(null); setFile(null);}} className="text-slate-400 hover:text-red-500 transition-colors"><X size={20}/></button>
+               </div>
+               <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
+                  <p className="text-xs font-medium text-slate-500 mb-2">Pilih file docx/pdf untuk mata kuliah {activeUploadId}. Pastikan format file sesuai instruksi Dosen pengampu.</p>
+                  <div>
+                     <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setFile(e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-md bg-white cursor-pointer" />
+                  </div>
+                  <button type="submit" disabled={isUploading} className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition-all mt-4">
+                     {isUploading ? 'Sedang Mengunggah...' : 'Submit Jawaban UTS'}
+                  </button>
+               </form>
+            </div>
+         </div>
+      )}
     </div>
   );
 };

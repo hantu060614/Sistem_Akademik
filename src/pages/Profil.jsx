@@ -6,7 +6,7 @@ import {
   ShieldCheck, Camera, Edit3, Fingerprint, 
   Droplet, Heart, Flag, CreditCard, Building, CheckCircle, X, Key
 } from 'lucide-react';
-import { getAllUsers, updateUser } from '../services/db';
+import { getAllUsers, updateUser, uploadUserAvatar } from '../services/db';
 
 const DataRow = ({ icon, label, value }) => (
   <div className="flex items-start py-3 border-b border-gray-50 last:border-0">
@@ -30,7 +30,7 @@ const Profil = () => {
   // Forms state
   const [profileForm, setProfileForm] = useState({});
   const [passwordForm, setPasswordForm] = useState({ old: '', new: '', confirm: '' });
-  const [avatarForm, setAvatarForm] = useState({ url: '' });
+  const [avatarForm, setAvatarForm] = useState({ url: '', file: null });
 
   const fetchUser = () => {
      if(!userId) return;
@@ -95,11 +95,21 @@ const Profil = () => {
     alert('Password berhasil diubah!');
   };
 
-  const handleSaveAvatar = () => {
-    updateUser(userId, { avatarUrl: avatarForm.url });
+  const handleSaveAvatar = async () => {
+    if (avatarForm.file) {
+       const newFotoUrl = await uploadUserAvatar(userId, avatarForm.file);
+       if (newFotoUrl) {
+           updateUser(userId, { avatarUrl: newFotoUrl });
+           alert('Foto profil sistem berhasil diunggah!');
+       } else {
+           alert('Gagal terhubung ke API backend saat mengunggah foto.');
+       }
+    } else if (avatarForm.url) {
+       updateUser(userId, { avatarUrl: avatarForm.url });
+       alert('Foto profil URL eksternal berhasil diubah!');
+    }
     setIsAvatarOpen(false);
     fetchUser();
-    alert('Foto profil berhasil diubah!');
   };
 
   if(!userData) return <div className="p-10 text-center font-bold text-gray-500">Memuat profil...</div>;
@@ -344,8 +354,10 @@ const Profil = () => {
              </div>
              <div className="p-6 space-y-4 text-center">
                 <Camera size={48} className="mx-auto text-blue-300 mb-2" />
-                <p className="text-sm text-gray-500 mb-4">Untuk demonstrasi, silakan tempel URL gambar valid (berakhiran .jpg/.png) ke dalam kolom di bawah.</p>
+                <p className="text-sm text-gray-500 mb-4">Pilih file foto dari perangkat Anda atau dari URL eksternal.</p>
                 <div>
+                   <input type="file" accept="image/*" onChange={(e) => setAvatarForm({...avatarForm, file: e.target.files[0]})} className="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 border border-gray-200 rounded-md bg-white cursor-pointer mb-2" />
+                   <div className="text-[10px] uppercase font-bold text-gray-400 mb-2">Atau lekatkan link URL</div>
                    <input type="url" placeholder="https://example.com/foto.jpg" value={avatarForm.url} onChange={(e) => setAvatarForm({...avatarForm, url: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" />
                 </div>
              </div>

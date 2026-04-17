@@ -134,6 +134,22 @@ def add_flowchart_placeholder(title, description):
     run.font.color.rgb = RGBColor(128, 128, 128)
     doc.add_paragraph()
 
+def add_screenshot_placeholder(title):
+    add_para(title, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER, size=11)
+    table = doc.add_table(rows=1, cols=1)
+    table.style = 'Table Grid'
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    cell = table.rows[0].cells[0]
+    cell.text = ''
+    p = cell.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run(f'\n\n[TEMPEL SCREENSHOT {title.upper()} DI SINI]\n\n')
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(14)
+    run.bold = True
+    run.font.color.rgb = RGBColor(150, 150, 150)
+    doc.add_paragraph()
+
 # ====================
 # COVER PAGE
 # ====================
@@ -243,12 +259,16 @@ toc_items = [
     ('    7.1 Pengujian Fungsional', '22'),
     ('    7.2 Hasil Pengujian', '22'),
     ('', ''),
-    ('BAB VIII KESIMPULAN DAN SARAN', '24'),
-    ('    8.1 Kesimpulan', '24'),
-    ('    8.2 Saran Pengembangan', '24'),
+    ('BAB VIII PEMELIHARAAN (MAINTENANCE)', '24'),
+    ('    8.1 Rencana Pemeliharaan', '24'),
+    ('    8.2 Perawatan Sistem', '24'),
     ('', ''),
-    ('DAFTAR PUSTAKA', '25'),
-    ('LAMPIRAN', '26'),
+    ('BAB IX KESIMPULAN DAN SARAN', '25'),
+    ('    9.1 Kesimpulan', '25'),
+    ('    9.2 Saran Pengembangan', '25'),
+    ('', ''),
+    ('DAFTAR PUSTAKA', '26'),
+    ('LAMPIRAN', '27'),
 ]
 
 for item, page in toc_items:
@@ -652,6 +672,8 @@ add_para('Prototipe SIAKAD Reborn dibangun dengan arsitektur client-server, dima
 
 add_para('Keunggulan arsitektur ini adalah pemisahan tanggung jawab (separation of concerns) yang jelas antara presentasi, logika bisnis, dan penyimpanan data. Hal ini memudahkan proses pengembangan, debugging, dan pemeliharaan sistem.')
 
+add_para('Integrasi Fungsional 100%: Pada tahap penyempurnaan terbaru (Full-Stack Data Integration), atribut-atribut krusial seperti proses unggah berkas (CNP, UTS, UAS, dan Foto Profil) yang semula merupakan mock-up visual kini telah menggunakan Engine Multer berbasis Node.js yang mengirimkan fisik file (Multipart) dan mengkonversi URL di tabel MySQL. Fungsi "Lupa Kata Sandi" kini juga tidak lagi berupa tautan statis, melainkan fitur validasi dua-faktor (NIM dan Tanggal Lahir) tersambung riil ke Database XAMPP.', bold=True)
+
 add_heading_styled('5.2 Teknologi dan Tools', level=2)
 add_table_simple(
     ['Komponen', 'Teknologi', 'Versi'],
@@ -673,27 +695,27 @@ add_table_simple(
 add_heading_styled('5.3 Tampilan Antarmuka Sistem', level=2)
 add_para('Berikut adalah beberapa tampilan antarmuka (screenshot) dari prototipe SIAKAD Reborn yang telah dibangun:')
 
-add_para('[Screenshot 1] — Halaman Landing Page', bold=True, size=11)
+add_screenshot_placeholder('Halaman Landing Page (Berisi Form Lupa Sandi)')
 add_para('Halaman utama sistem yang menampilkan informasi umum tentang SIAKAD Reborn, fitur-fitur unggulan, serta tombol login untuk masuk ke sistem. Desain menggunakan gradien modern dengan efek glassmorphism.', italic=True)
 doc.add_paragraph()
 
-add_para('[Screenshot 2] — Dashboard Mahasiswa', bold=True, size=11)
+add_screenshot_placeholder('Dashboard Mahasiswa')
 add_para('Dashboard mahasiswa menampilkan ringkasan informasi akademik: pengumuman terbaru, status keuangan, jadwal hari ini, serta akses cepat ke modul-modul utama.', italic=True)
 doc.add_paragraph()
 
-add_para('[Screenshot 3] — Halaman Pengisian KRS', bold=True, size=11)
+add_screenshot_placeholder('Halaman Pengisian KRS')
 add_para('Antarmuka pengisian KRS dengan daftar mata kuliah yang tersedia, informasi SKS, dan indikator status pengajuan.', italic=True)
 doc.add_paragraph()
 
-add_para('[Screenshot 4] — Halaman IKM (Indeks Keaktifan Mahasiswa)', bold=True, size=11)
+add_screenshot_placeholder('Halaman IKM (Indeks Keaktifan Mahasiswa)')
 add_para('Form input kegiatan kemahasiswaan dengan dropdown kategori, peringkat, serta fitur upload sertifikat dan foto dokumentasi. Dilengkapi tabel riwayat poin.', italic=True)
 doc.add_paragraph()
 
-add_para('[Screenshot 5] — Dashboard Admin BAAK', bold=True, size=11)
+add_screenshot_placeholder('Dashboard Admin BAAK (Validasi Data)')
 add_para('Panel administrasi terpusat yang memungkinkan admin mengelola seluruh data master dan memvalidasi pengajuan mahasiswa.', italic=True)
 doc.add_paragraph()
 
-add_para('Catatan: Silakan tambahkan screenshot dengan cara mengambil tangkapan layar (Print Screen) dari prototipe yang sedang berjalan, kemudian paste ke posisi masing-masing di atas.', italic=True, size=10)
+add_para('Catatan: Silakan tambahkan screenshot fisik dengan cara mengambil tangkapan layar (Print Screen) dari prototipe yang sedang berjalan, kemudian timpa area Placeholder di atas.', italic=True, size=10)
 
 add_heading_styled('5.4 Fitur-Fitur Utama Prototipe', level=2)
 add_para('Prototipe SIAKAD Reborn telah mengimplementasikan fitur-fitur berikut secara fungsional:')
@@ -701,7 +723,7 @@ add_para('Prototipe SIAKAD Reborn telah mengimplementasikan fitur-fitur berikut 
 add_table_simple(
     ['No', 'Modul', 'Role', 'Deskripsi Fungsionalitas'],
     [
-        ['1', 'Autentikasi', 'Semua', 'Login dengan validasi kredensial, routing otomatis berdasarkan role, manajemen sesi via localStorage.'],
+        ['1', 'Autentikasi & Keamanan', 'Semua', 'Login dengan validasi kredensial sistematis riil, Forgot Password verifikasi tangal lahir database, manajemen session.'],
         ['2', 'Dashboard', 'Semua', 'Papan pengumuman dinamis, ringkasan status per role, navigasi cepat.'],
         ['3', 'Profil', 'Mhs, Dsn', 'Tampilkan & edit biodata, ganti password, upload foto profil.'],
         ['4', 'KRS', 'Mhs', 'Pilih mata kuliah, validasi batas SKS, submit & tracking status.'],
@@ -807,31 +829,49 @@ add_para('Berdasarkan hasil pengujian Black Box Testing di atas, seluruh 15 sken
 doc.add_page_break()
 
 # ==============================
-# BAB VIII - KESIMPULAN & SARAN
+# BAB VIII - PEMELIHARAAN
 # ==============================
 
 add_heading_styled('BAB VIII', level=1).alignment = WD_ALIGN_PARAGRAPH.CENTER
+add_heading_styled('PEMELIHARAAN (MAINTENANCE)', level=1).alignment = WD_ALIGN_PARAGRAPH.CENTER
+doc.add_paragraph()
+
+add_heading_styled('8.1 Rencana Pemeliharaan', level=2)
+add_para('Pemeliharaan (Maintenance) adalah tahapan terakhir dalam SDLC yang sangat vital untuk memastikan sistem SIAKAD Reborn tetap berjalan optimal seiring waktu. Rencana pemeliharaan ini disusun ke dalam 3 jenis:', bold=False)
+
+add_bullet('Pemeliharaan Korektif (Corrective): Memperbaiki bug atau anomali sistem (seperti database timeout atau kendala sinkronisasi data UI) yang mungkin muncul ketika digunakan secara massal oleh ribuan mahasiswa LP3I saat pengisian KRS.')
+add_bullet('Pemeliharaan Adaptif (Adaptive): Menyesuaikan Modul Backend Node.js dan Frontend React dengan versi dependensi terbaru (libraries) untuk menghindari celah keamanan (vulnerability).')
+add_bullet('Pemeliharaan Perfektif (Perfective): Melakukan penyempurnaan UI/UX secara bertahap dan menambahkan fitur minor seperti notifikasi Push (Service Worker) berdasarkan feedback pengguna akademik tanpa mengubah proses inti bisnis.')
+
+add_heading_styled('8.2 Perawatan Sistem', level=2)
+add_para('Untuk menjaga kinerja operasional sistem, perawatan terjadwal akan dilakukan:', bold=False)
+add_bullet('Database Backup: Mencadangkan (backup) tabel-tabel MySQL krusial (KRS, Nilai, Keuangan) setiap minggu ke External Storage (Harddisk) guna mitigasi bencana.')
+add_bullet('Log Monitoring: Memeriksa Node.js / Express log untuk mendeteksi anomali request dan memitigasi serangan traffic (DDoS) dari luar kampus.')
+add_bullet('Purge Cache Data: Membersihkan tumpukan cache data mahasiswa pada Browser localStorage setiap satu semester sekali agar ukuran file tidak membebani kapasitas peramban HP Mahasiswa.')
+
+doc.add_page_break()
+
+# ==============================
+# BAB IX - KESIMPULAN & SARAN
+# ==============================
+
+add_heading_styled('BAB IX', level=1).alignment = WD_ALIGN_PARAGRAPH.CENTER
 add_heading_styled('KESIMPULAN DAN SARAN', level=1).alignment = WD_ALIGN_PARAGRAPH.CENTER
 doc.add_paragraph()
 
-add_heading_styled('8.1 Kesimpulan', level=2)
+add_heading_styled('9.1 Kesimpulan', level=2)
 add_para('Berdasarkan hasil penelitian, perancangan, implementasi, dan pengujian yang telah dilakukan, maka dapat ditarik kesimpulan sebagai berikut:')
-
 add_bullet('Sistem SIAKAD yang berjalan di LP3I Cirebon saat ini sudah cukup memadai namun masih memiliki beberapa keterbatasan, terutama dalam hal antarmuka pengguna, integrasi modul, dan proses administrasi yang belum sepenuhnya otomatis.')
-add_bullet('Dengan menerapkan metode SDLC model Waterfall, berhasil dirancang sistem SIAKAD baru (SIAKAD Reborn) yang memiliki keunggulan signifikan dibanding sistem lama, meliputi: antarmuka modern dan responsif, arsitektur terpisah (decoupled), pusat validasi terpusat, sistem IKM berbasis poin yang komprehensif, integrasi modul literasi digital, dan helpdesk terintegrasi.')
-add_bullet('Prototipe aplikasi SIAKAD Reborn telah berhasil dibangun menggunakan React.js, Node.js, Express.js, dan MySQL. Prototipe ini bersifat fungsional dan siap deploy dengan 25+ modul yang terintegrasi dan mencakup 3 role pengguna (Mahasiswa, Dosen, Admin BAAK).')
+add_bullet('Dengan menerapkan metode SDLC model Waterfall, berhasil merancang sistem SIAKAD baru (SIAKAD Reborn) yang mengakomodasi 6 tahapan murni: Planning, Analysis, Design, Implementation, Testing & Evaluasi, hingga tahapan Maintenance jangka panjang sistem.')
+add_bullet('Prototipe aplikasi SIAKAD Reborn telah berhasil dibangun menggunakan React.js, Node.js, Express.js, dan MySQL. Prototipe ini bersifat fungsional dan siap deploy dengan mekanisme Multer untuk upload berkas terpusat dan verifikasi otentik Lupa Kata Sandi.')
 add_bullet('Pengujian Black Box Testing terhadap 15 skenario menunjukkan tingkat keberhasilan 100%, membuktikan bahwa prototipe telah berfungsi sesuai dengan perancangan sistem.')
-add_bullet('Sistem baru berhasil mengatasi kekurangan sistem lama terutama dalam aspek: (1) user experience, (2) integrasi antar modul, (3) otomatisasi proses administrasi, dan (4) penambahan fitur-fitur baru yang relevan dengan kebutuhan pendidikan era digital.')
 
-add_heading_styled('8.2 Saran Pengembangan', level=2)
+add_heading_styled('9.2 Saran Pengembangan', level=2)
 add_para('Untuk pengembangan lebih lanjut, penulis menyarankan:')
-
 add_bullet('Penambahan fitur autentikasi berbasis token (JWT) untuk meningkatkan keamanan sistem di lingkungan produksi.')
 add_bullet('Implementasi Progressive Web App (PWA) agar sistem dapat diakses secara offline dan memberikan pengalaman seperti aplikasi native di perangkat mobile.')
 add_bullet('Integrasi dengan sistem pembayaran online (Payment Gateway) untuk memfasilitasi pembayaran SPP/UKT secara langsung melalui SIAKAD.')
-add_bullet('Penambahan fitur notifikasi real-time menggunakan WebSocket agar pengguna mendapat pemberitahuan instan ketika ada perubahan status pada pengajuan mereka.')
-add_bullet('Deployment ke server cloud (AWS, GCP, atau Heroku) agar sistem dapat diakses secara publik oleh seluruh civitas akademika.')
-add_bullet('Implementasi fitur pembuatan laporan (reporting) dan dashboard analytics untuk mendukung pengambilan keputusan oleh pihak manajemen kampus.')
+add_bullet('Deployment ke server publik (Cloud) agar sistem dapat diakses secara global oleh seluruh civitas akademika Politeknik LP3I.')
 
 doc.add_page_break()
 

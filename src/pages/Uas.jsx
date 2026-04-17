@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowLeft, BookOpenCheck, Clock, Calendar as CalendarIcon, 
-  Download, UploadCloud, CheckCircle, AlertOctagon 
+  Download, UploadCloud, CheckCircle, AlertOctagon, X 
 } from 'lucide-react';
+import { addSubmission, getUserSubmissions } from '../services/db';
 
 const Uas = () => {
-  const [uploadedExams, setUploadedExams] = useState([]);
+  const userId = localStorage.getItem('userId');
+  const [submissions, setSubmissions] = useState([]);
+  const [activeUploadId, setActiveUploadId] = useState(null);
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  React.useEffect(() => {
+     if(userId) setSubmissions(getUserSubmissions(userId, 'uas'));
+  }, [userId]);
 
   // Data Dummy UAS (Tanggalnya digeser ke akhir semester)
   const dataUas = [
@@ -27,11 +36,17 @@ const Uas = () => {
     }
   ];
 
-  const handleUpload = (id) => {
-    if (!uploadedExams.includes(id)) {
-      setUploadedExams([...uploadedExams, id]);
-      alert('File jawaban UAS berhasil diunggah! Semoga sukses!');
-    }
+  const handleUploadSubmit = async (e) => {
+     e.preventDefault();
+     if(!file) return alert('Pilih file jawaban Anda terlebih dahulu!');
+     setIsUploading(true);
+     const data = { nim: userId, kategori: 'uas', tipe: activeUploadId, status: 'Terkumpul' };
+     await addSubmission(data, file);
+     setSubmissions(getUserSubmissions(userId, 'uas'));
+     setIsUploading(false);
+     setActiveUploadId(null);
+     setFile(null);
+     alert('File jawaban UAS berhasil diunggah! Semoga sukses!');
   };
 
   return (
@@ -69,7 +84,7 @@ const Uas = () => {
       {/* GRID KARTU UJIAN */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {dataUas.map((ujian) => {
-          const isUploaded = uploadedExams.includes(ujian.id) || ujian.status === 'selesai';
+          const isUploaded = submissions.some(s => s.tipe === ujian.id) || ujian.status === 'selesai';
           const currentStatus = isUploaded ? 'selesai' : ujian.status;
 
           return (
@@ -120,7 +135,7 @@ const Uas = () => {
                       <Download size={16} className="mr-2" /> Download
                     </button>
                     <button 
-                      onClick={() => handleUpload(ujian.id)}
+                      onClick={() => setActiveUploadId(ujian.id)}
                       className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/30 flex items-center justify-center text-sm"
                     >
                       <UploadCloud size={16} className="mr-2" /> Upload
@@ -139,6 +154,27 @@ const Uas = () => {
           );
         })}
       </div>
+
+      {/* MODAL UPLOAD UAS */}
+      {activeUploadId && (
+         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
+               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-red-50/50">
+                  <h3 className="font-extrabold text-lg text-red-900 flex items-center"><UploadCloud size={18} className="mr-2"/> Upload Jawaban</h3>
+                  <button onClick={() => {setActiveUploadId(null); setFile(null);}} className="text-slate-400 hover:text-red-500 transition-colors"><X size={20}/></button>
+               </div>
+               <form onSubmit={handleUploadSubmit} className="p-6 space-y-4">
+                  <p className="text-xs font-medium text-slate-500 mb-2">Pilih file docx/pdf untuk mata kuliah {activeUploadId}. Pastikan format file sesuai instruksi Dosen pengampu UAS.</p>
+                  <div>
+                     <input type="file" accept=".pdf,.doc,.docx,.zip" onChange={(e) => setFile(e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 border border-slate-200 rounded-md bg-white cursor-pointer" />
+                  </div>
+                  <button type="submit" disabled={isUploading} className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/30 transition-all mt-4">
+                     {isUploading ? 'Sedang Mengunggah...' : 'Submit Jawaban UAS'}
+                  </button>
+               </form>
+            </div>
+         </div>
+      )}
     </div>
   );
 };
