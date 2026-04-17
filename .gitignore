@@ -25,5 +25,6 @@ dist-ssr
 
 # Generated Content & Uploads
 Makalah_UTS_SIAKAD_Reborn.docx
+generate_makalah.py
 build_error.txt
 backend/uploads/*
