@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated Content & Uploads
+Makalah_UTS_SIAKAD_Reborn.docx
+build_error.txt
+backend/uploads/*
